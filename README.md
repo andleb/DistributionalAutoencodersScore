@@ -30,11 +30,13 @@ Their respective licenses are reproduced in the `third_party_licenses` folder.
 If you find this code useful in your research, please consider citing the following paper:
 
 ```
-@inproceedings{leban2025distributionalautoencodersknowscore,
-      title={Distributional Autoencoders Know the Score},
-      author={Andrej Leban},
-      year={2025},
-      booktitle = {Advances in Neural Information Processing Systems},
+@inproceedings{
+leban2025distributionalautoencodersknowscore,
+title={Distributional Autoencoders Know the Score},
+author={Andrej Leban},
+booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
+year={2025},
+url={https://neurips.cc/virtual/2025/poster/119870}
 }
 ```
 
