@@ -1,0 +1,14 @@
+dcor==0.6
+joblib==1.4.2
+lightning==2.3.0
+matplotlib==3.10.3
+numpy==2.2.6
+pandas==2.2.3
+scikit_learn==1.6.1
+scipy==1.15.3
+seaborn==0.13.2
+scikit-image==0.25.1
+torch==2.4.0
+tqdm==4.66.5
+utils==1.0.2
+engression==0.1.12
