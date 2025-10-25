@@ -1,5 +1,5 @@
 # DistributionalAutoencodersScore
-Official code repository for Distributional Autoencoders Know the Score, NeurIPS 2025.  
+Official code repository for [Distributional Autoencoders Know the Score](https://arxiv.org/abs/2502.11583), NeurIPS 2025.  
 
 Besides software from `pypi` installed via  `requirement.txt`, this repository depends on the following packages, which can be installed from their respective GitHub repositories:
 - [Distributional Principal Autoencoder](https://github.com/xwshen51/DistributionalPrincipalAutoencoder)
@@ -27,7 +27,7 @@ Their respective licenses are reproduced in the `third_party_licenses` folder.
     * `plot_utils.py` - plotting utilities (some adapted from `mlcolvar`) 
 
 ## Citing
-If you find this code useful in your research, please consider citing the following paper:
+If you find this code useful in your research, please consider citing the paper:
 
 ```
 @inproceedings{
