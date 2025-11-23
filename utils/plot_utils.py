@@ -4,7 +4,6 @@
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import mlcolvar
 import numpy as np
 import torch
 from matplotlib import patches as mpatches
@@ -54,11 +53,6 @@ def muller_brown_potential(x, y):
     return v
 
 
-def muller_brown_mfep():
-    mfep = np.loadtxt(mlcolvar.__path__[0] + "/../docs/notebooks/tutorials/data/muller-brown/mfep.txt",
-                      usecols=(0, 1), )
-    return mfep
-
 
 def muller_brown_potential_three_states(x, y):
     """Muller-Brown analytical potential"""
@@ -76,12 +70,6 @@ def muller_brown_potential_three_states(x, y):
         v += (prefactor * A[i] * np.exp(
             a[i] * (x - x0[i]) ** 2 + b[i] * (x - x0[i]) * (y - y0[i]) + c[i] * (y - y0[i]) ** 2))
     return v
-
-
-def muller_brown_three_states_mfep():
-    mfep = np.loadtxt(mlcolvar.__path__[0] + "/../docs/notebooks/tutorials/data/muller-brown-3states/mfep.txt",
-                      usecols=(0, 1), )
-    return mfep
 
 
 def plot_metrics(metrics, keys=["train_loss_epoch", "valid_loss"], x=None, labels=None, linestyles=None, colors=None,
