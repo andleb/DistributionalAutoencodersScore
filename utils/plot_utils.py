@@ -3,15 +3,24 @@
 # Licensed under the MIT License, original license reproduced in third_party_licenses/mlcolvar/LICENSE
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import numpy as np
-import torch
-from matplotlib import patches as mpatches
 from matplotlib.colors import LinearSegmentedColormap, ColorConverter
 
-__all__ = ["paletteFessa", "paletteCortina", "plot_metrics", "plot_features_distribution"]
+__all__ = [
+    "paletteFessa",
+    "paletteCortina",
+    "plot_metrics",
+    "plot_features_distribution",
+]
 
-paletteFessa = ["#1F3B73", "#2F9294", "#50B28D", "#A7D655", "#FFE03E", "#FFA955", "#D6573B", ]
+paletteFessa = [
+    "#1F3B73",
+    "#2F9294",
+    "#50B28D",
+    "#A7D655",
+    "#FFE03E",
+    "#FFA955",
+    "#D6573B",
+]
 
 cm_fessa = LinearSegmentedColormap.from_list("fessa", paletteFessa)
 mpl.colormaps.register(cmap=cm_fessa)
@@ -20,11 +29,14 @@ mpl.colormaps.register(cmap=cm_fessa.reversed())
 for i in range(len(paletteFessa)):
     ColorConverter.colors[f"fessa{i}"] = paletteFessa[i]
 
-paletteCortina = [[0.0, 0.0, 0.803921568627451, 1], [0.4823529411764706, 0.40784313725490196, 0.9333333333333333, 1],
-                  [0.0, 0.9803921568627451, 0.6039215686274509, 1],
-                  [0.23529411764705882, 0.7019607843137254, 0.44313725490196076, 1],
-                  [0.8588235294117647, 0.4392156862745098, 0.5764705882352941, 1],
-                  [0.7803921568627451, 0.08235294117647059, 0.5215686274509804, 1], ]
+paletteCortina = [
+    [0.0, 0.0, 0.803921568627451, 1],
+    [0.4823529411764706, 0.40784313725490196, 0.9333333333333333, 1],
+    [0.0, 0.9803921568627451, 0.6039215686274509, 1],
+    [0.23529411764705882, 0.7019607843137254, 0.44313725490196076, 1],
+    [0.8588235294117647, 0.4392156862745098, 0.5764705882352941, 1],
+    [0.7803921568627451, 0.08235294117647059, 0.5215686274509804, 1],
+]
 
 cm_cortina = LinearSegmentedColormap.from_list("cortina80", paletteCortina)
 mpl.colormaps.register(cmap=cm_cortina)
@@ -48,10 +60,16 @@ def muller_brown_potential(x, y):
 
     v = -prefactor * offset
     for i in range(4):
-        v += (prefactor * A[i] * np.exp(
-            a[i] * (x - x0[i]) ** 2 + b[i] * (x - x0[i]) * (y - y0[i]) + c[i] * (y - y0[i]) ** 2))
+        v += (
+            prefactor
+            * A[i]
+            * np.exp(
+                a[i] * (x - x0[i]) ** 2
+                + b[i] * (x - x0[i]) * (y - y0[i])
+                + c[i] * (y - y0[i]) ** 2
+            )
+        )
     return v
-
 
 
 def muller_brown_potential_three_states(x, y):
@@ -67,13 +85,31 @@ def muller_brown_potential_three_states(x, y):
 
     v = -prefactor * offset
     for i in range(4):
-        v += (prefactor * A[i] * np.exp(
-            a[i] * (x - x0[i]) ** 2 + b[i] * (x - x0[i]) * (y - y0[i]) + c[i] * (y - y0[i]) ** 2))
+        v += (
+            prefactor
+            * A[i]
+            * np.exp(
+                a[i] * (x - x0[i]) ** 2
+                + b[i] * (x - x0[i]) * (y - y0[i])
+                + c[i] * (y - y0[i]) ** 2
+            )
+        )
     return v
 
 
-def plot_metrics(metrics, keys=["train_loss_epoch", "valid_loss"], x=None, labels=None, linestyles=None, colors=None,
-                 xlabel="Epoch", ylabel="Loss", title="Learning curves", yscale=None, ax=None, ):
+def plot_metrics(
+    metrics,
+    keys=["train_loss_epoch", "valid_loss"],
+    x=None,
+    labels=None,
+    linestyles=None,
+    colors=None,
+    xlabel="Epoch",
+    ylabel="Loss",
+    title="Learning curves",
+    yscale=None,
+    ax=None,
+):
     """Plot logged metrics."""
 
     return_axs = False
@@ -125,7 +161,7 @@ def plot_features_distribution(dataset, features, titles=None, axs=None):
     """
 
     if isinstance(features, dict):
-        raise TypeError('features should be a list of feature names, not a dictionary')
+        raise TypeError("features should be a list of feature names, not a dictionary")
 
     n_feat = len(features)
 
@@ -135,45 +171,62 @@ def plot_features_distribution(dataset, features, titles=None, axs=None):
         else:
             fig, axs = plt.subplots(n_feat, 1, figsize=(3, 3 * n_feat))
 
-        plt.suptitle('Features distribution')
+        plt.suptitle("Features distribution")
         init_ax = True
     else:
         if n_feat != len(axs):
-            raise ValueError(f'Number of features ({len(features)}) != number of axis ({len(axs)})')
+            raise ValueError(
+                f"Number of features ({len(features)}) != number of axis ({len(axs)})"
+            )
         init_ax = False
 
-    axs[0].set_ylabel('Distribution')
+    axs[0].set_ylabel("Distribution")
 
     if "labels" in dataset.keys:
-        labels = sorted(dataset['labels'].unique().numpy())
+        labels = sorted(dataset["labels"].unique().numpy())
         for l in labels:
-            id_l = np.argwhere(dataset['labels'] == l)[0, :]
-            data_label = dataset['data'][id_l, :]
+            id_l = np.argwhere(dataset["labels"] == l)[0, :]
+            data_label = dataset["data"][id_l, :]
 
             for i, feat in enumerate(features):
                 ax = axs[i]
                 id = np.argwhere(dataset.feature_names == feat)[0]
                 x = data_label[:, id].numpy()
-                ax.hist(x, bins=50, label=f"State {int(l)}", histtype='step')
+                ax.hist(x, bins=50, label=f"State {int(l)}", histtype="step")
                 ax.set_yticks([])
                 ax.set_xlabel(feat)
                 if i == 0:
                     if titles is not None:
-                        ax.legend(title=titles[i], loc='upper center', framealpha=0.8, edgecolor='white')
+                        ax.legend(
+                            title=titles[i],
+                            loc="upper center",
+                            framealpha=0.8,
+                            edgecolor="white",
+                        )
                     else:
-                        ax.legend(loc='upper center', framealpha=0.8, edgecolor='white')
+                        ax.legend(loc="upper center", framealpha=0.8, edgecolor="white")
                 else:
                     if titles is not None:
-                        ax.legend([], [], title=titles[i], loc='upper center', framealpha=0.8, edgecolor='white')
+                        ax.legend(
+                            [],
+                            [],
+                            title=titles[i],
+                            loc="upper center",
+                            framealpha=0.8,
+                            edgecolor="white",
+                        )
     else:
         for i, feat in enumerate(features):
             ax = axs[i]
             id = np.argwhere(dataset.feature_names == feat)[0]
-            data = dataset['data']
+            data = dataset["data"]
             x = data[:, id].numpy()
-            ax.hist(x, bins=100, )
+            ax.hist(
+                x,
+                bins=100,
+            )
             ax.set_yticks([])
-            ax.legend([], [], title=feat, loc='upper center', frameon=False)
+            ax.legend([], [], title=feat, loc="upper center", frameon=False)
 
 
 def test_utils_plot():
@@ -194,9 +247,22 @@ def test_utils_plot():
     cmap = matplotlib.colors.Colormap("cortina80_r", 2)
 
 
-def plot_isolines_2D(function, component=None, limits=((-1.8, 1.2), (-0.4, 2.1)), num_points=(100, 100),
-                     mode="contourf", levels=12, cmap=None, colorbar=None, max_value=None, ax=None, allow_grad=False,
-                     xx=None, yy=None, **kwargs, ):
+def plot_isolines_2D(
+    function,
+    component=None,
+    limits=((-1.8, 1.2), (-0.4, 2.1)),
+    num_points=(100, 100),
+    mode="contourf",
+    levels=12,
+    cmap=None,
+    colorbar=None,
+    max_value=None,
+    ax=None,
+    allow_grad=False,
+    xx=None,
+    yy=None,
+    **kwargs,
+):
     """Plot isolines of a function/model in a 2D space."""
 
     if type(num_points) == int:
@@ -238,7 +304,7 @@ def plot_isolines_2D(function, component=None, limits=((-1.8, 1.2), (-0.4, 2.1))
         if mode == "contourf":
             cmap = "fessa"
         elif mode == "contour":
-            if 'colors' not in kwargs:
+            if "colors" not in kwargs:
                 cmap = "Greys_r"
 
     if colorbar is None:
@@ -260,8 +326,20 @@ def plot_isolines_2D(function, component=None, limits=((-1.8, 1.2), (-0.4, 2.1))
         return xv, yv, z
 
 
-def plot_gradient_2D(function, component=None, fin_diff=True, limits=((-1.8, 1.2), (-0.4, 2.1)), num_points=(20, 20),
-                     clip_grad=None, cmap=None, ax=None, allow_grad=False, xx=None, yy=None, **kwargs, ):
+def plot_gradient_2D(
+    function,
+    component=None,
+    fin_diff=True,
+    limits=((-1.8, 1.2), (-0.4, 2.1)),
+    num_points=(20, 20),
+    clip_grad=None,
+    cmap=None,
+    ax=None,
+    allow_grad=False,
+    xx=None,
+    yy=None,
+    **kwargs,
+):
     """Plot gradient of a function/model in a 2D space."""
 
     if isinstance(num_points, int):
@@ -273,8 +351,11 @@ def plot_gradient_2D(function, component=None, fin_diff=True, limits=((-1.8, 1.2
     xv, yv = np.meshgrid(xx, yy)
 
     if isinstance(function, torch.nn.Module) and not fin_diff:
-        grid_points = torch.tensor(np.stack([xv.flatten(), yv.flatten()], axis=1), dtype=torch.float32,
-                                   requires_grad=True).to(next(function.parameters()).device)
+        grid_points = torch.tensor(
+            np.stack([xv.flatten(), yv.flatten()], axis=1),
+            dtype=torch.float32,
+            requires_grad=True,
+        ).to(next(function.parameters()).device)
 
         if not allow_grad:
             train_mode = function.training
@@ -291,10 +372,17 @@ def plot_gradient_2D(function, component=None, fin_diff=True, limits=((-1.8, 1.2
             loss = outputs.sum()
 
             if not any(p.requires_grad for p in [grid_points, loss]):
-                raise RuntimeError("No tensor in the computation graph requires gradients")
+                raise RuntimeError(
+                    "No tensor in the computation graph requires gradients"
+                )
 
-            gradients = \
-                torch.autograd.grad(loss, grid_points, create_graph=False, retain_graph=False, allow_unused=True)[0]
+            gradients = torch.autograd.grad(
+                loss,
+                grid_points,
+                create_graph=False,
+                retain_graph=False,
+                allow_unused=True,
+            )[0]
 
             if gradients is None:
                 raise RuntimeError("Gradient computation returned None")
@@ -308,8 +396,9 @@ def plot_gradient_2D(function, component=None, fin_diff=True, limits=((-1.8, 1.2
         if not isinstance(function, torch.nn.Module):
             z = function(xv, yv)
         else:
-            grid_points = torch.tensor(np.stack([xv.flatten(), yv.flatten()], axis=1), dtype=torch.float32).to(
-                next(function.parameters()).device)
+            grid_points = torch.tensor(
+                np.stack([xv.flatten(), yv.flatten()], axis=1), dtype=torch.float32
+            ).to(next(function.parameters()).device)
 
             outputs = function(grid_points)
 
@@ -336,7 +425,7 @@ def plot_gradient_2D(function, component=None, fin_diff=True, limits=((-1.8, 1.2
     if cmap is None:
         cmap = "viridis"
 
-    magnitude = np.sqrt(dz_dx ** 2 + dz_dy ** 2)
+    magnitude = np.sqrt(dz_dx**2 + dz_dy**2)
     if clip_grad is not None:
         dz_dx = np.clip(dz_dx, -clip_grad, clip_grad)
         dz_dy = np.clip(dz_dy, -clip_grad, clip_grad)
