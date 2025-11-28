@@ -47,15 +47,16 @@ For code that was modified, the respective licenses are reproduced in the `third
    # NOTE: PyTorch-VAE is not on PyPI, clone it into src/ as shown in Option B!
    ```
 
-   **Option B:** Clone them locally, for example as submodules in the `src` folder:
+   **Option B:** Clone them locally:
    ```bash
    mkdir -p src
-   cd src
-   git submodule add git@github.com:xwshen51/DistributionalPrincipalAutoencoder.git
-   git submodule add git@github.com:luigibonati/mlcolvar.git
-   git submodule add git@github.com:AntixK/PyTorch-VAE.git
-   cd ..
+    cd src
+    git clone https://github.com/xwshen51/DistributionalPrincipalAutoencoder.git
+    git clone https://github.com/luigibonati/mlcolvar.git
+    git clone https://github.com/AntixK/PyTorch-VAE.git
+    cd ..
    ```
+   One could also use submodules for the above if they are familiar with them.
 
 4. If needed, add the root of this repository to your `PYTHONPATH`:
    ```bash
@@ -74,18 +75,18 @@ The structure of the repository is as follows:
 
 - `data` - datasets used in the experiments
 - `exp` - the experiments scripts and notebooks
+    * `Gaussian_score.ipynb` – reproduces Figure 1
+    * `score_alignment.py` - reproduces Table 1
     * `MB.ipynb` - reproduces Figure 2
     * `MFEP_comparisons.py` - reproduces Table 2 and Figures 6, 7
     * `train_indep.py` - trains the basic models for Table 3
     * `run_train_simple.sh` - bash script to train multiple models in parallel
-    * `Indep-deterministic.ipynb` - analyzes conditional independence for deterministic extraneous latents (Table 3)
     * `train_swiss.py` - trains the Swiss-roll models for Table 3
     * `train_scurve.py` - trains the S-curve models for Table 3
     * `train_scurve.sh`, `run_train_simple.sh`, `train_swiss.sh` - bash scripts to train the models for Table 3
     * `Indep-deterministic.ipynb` - reproduces Table 3
     * `run_CRT_linear.py` - performs the CRT experiment in Section 4.2
     * `Indep-extra.ipynb` - reproduces Table 6
-    * `mfep_utils.py` - utility functions for MFEP (Minimum Free Energy Path) experiments
 - `utils` - utility functions (load the module onto your path)
     * `mfep_utils.py` - utility functions for MFEP experiments
     * `plot_utils.py` - plotting utilities (some adapted from `mlcolvar`)
