@@ -33,9 +33,8 @@ Their respective licenses are reproduced in the `third_party_licenses` folder.
    pip install -r requirements.txt    
    ```
 
-3. Install the Distributional Principal Autoencoder (with `engression` as its dependency) and mlcolvar dependencies:  
+3. Install the Distributional Principal Autoencoder and mlcolvar dependencies:  
   ```bash
-  pip install engression
   pip install DistributionalPrincipalAutoencoder
   pip install mlcolvar  
   ```
@@ -44,7 +43,6 @@ OR clone them locally, for example as submodules in the `src` folder:
 ```bash
   mkdir src
   cd src
-  git submodule add git@github.com:xwshen51/engression.git
   git submodule add git@github.com:xwshen51/DistributionalPrincipalAutoencoder.git
   git submodule add git@github.com:luigibonati/mlcolvar.git
 ```
