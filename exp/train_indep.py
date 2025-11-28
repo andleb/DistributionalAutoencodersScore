@@ -11,7 +11,7 @@ import re
 
 import warnings
 
-warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
 import sys
@@ -23,12 +23,13 @@ def slurm_cpus():
             return int(os.environ[var])
     try:
         import psutil
+
         return len(psutil.Process().cpu_affinity())
     except Exception:
         return None
 
 
-n_threads = min(slurm_cpus(), 4)
+n_threads = min(slurm_cpus() or 1, 4)
 print("Use", n_threads, "threads", flush=True)
 
 os.environ["OMP_NUM_THREADS"] = f"{n_threads}"
@@ -44,7 +45,7 @@ import numpy as np
 import GPUtil
 
 if torch.cuda.is_available():
-    available_gpus = GPUtil.getAvailable(order='memory', limit=1)
+    available_gpus = GPUtil.getAvailable(order="memory", limit=1)
 
     if available_gpus:
         selected_gpu = available_gpus[0]
@@ -60,8 +61,12 @@ else:
 
 torch.manual_seed(SEED)
 
-sys.path += ["../src/DistributionalPrincipalAutoencoder", "../src/engression", "../src/mlcolvar",
-             "../src/PyTorch-VAE", ]
+sys.path += [
+    "../src/DistributionalPrincipalAutoencoder",
+    "../src/engression",
+    "../src/mlcolvar",
+    "../src/PyTorch-VAE",
+]
 
 from dpa.dpa_fit import DPA
 from engression.data import loader
@@ -73,41 +78,41 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-plt.style.use('default')
+plt.style.use("default")
 
-mpl.rcParams['figure.figsize'] = (10, 8)
-mpl.rcParams['figure.dpi'] = 200
-mpl.rcParams['savefig.dpi'] = 200
+mpl.rcParams["figure.figsize"] = (10, 8)
+mpl.rcParams["figure.dpi"] = 200
+mpl.rcParams["savefig.dpi"] = 200
 
-mpl.rcParams['font.size'] = 16
-mpl.rcParams['axes.titlesize'] = 20
-mpl.rcParams['axes.labelsize'] = 18
-mpl.rcParams['xtick.labelsize'] = 16
-mpl.rcParams['ytick.labelsize'] = 16
-mpl.rcParams['legend.fontsize'] = 16
+mpl.rcParams["font.size"] = 16
+mpl.rcParams["axes.titlesize"] = 20
+mpl.rcParams["axes.labelsize"] = 18
+mpl.rcParams["xtick.labelsize"] = 16
+mpl.rcParams["ytick.labelsize"] = 16
+mpl.rcParams["legend.fontsize"] = 16
 
-mpl.rcParams['lines.linewidth'] = 2.5
-mpl.rcParams['contour.linewidth'] = 1.5
-mpl.rcParams['lines.markersize'] = 10
-mpl.rcParams['axes.linewidth'] = 2
+mpl.rcParams["lines.linewidth"] = 2.5
+mpl.rcParams["contour.linewidth"] = 1.5
+mpl.rcParams["lines.markersize"] = 10
+mpl.rcParams["axes.linewidth"] = 2
 
-mpl.rcParams['axes.grid'] = False
-mpl.rcParams['grid.alpha'] = 0.3
-mpl.rcParams['grid.linewidth'] = 1
+mpl.rcParams["axes.grid"] = False
+mpl.rcParams["grid.alpha"] = 0.3
+mpl.rcParams["grid.linewidth"] = 1
 
-mpl.rcParams['legend.frameon'] = True
-mpl.rcParams['legend.framealpha'] = 1.0
-mpl.rcParams['legend.edgecolor'] = 'black'
+mpl.rcParams["legend.frameon"] = True
+mpl.rcParams["legend.framealpha"] = 1.0
+mpl.rcParams["legend.edgecolor"] = "black"
 
-mpl.rcParams['savefig.bbox'] = 'tight'
-mpl.rcParams['savefig.pad_inches'] = 0.1
+mpl.rcParams["savefig.bbox"] = "tight"
+mpl.rcParams["savefig.pad_inches"] = 0.1
 
 
 def extract_first_numbers_after_epoch(filename):
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         text = file.read()
 
-    pattern = r'\[Epoch (\d+)\]\s+([-*\d.]+)'
+    pattern = r"\[Epoch (\d+)\]\s+([-*\d.]+)"
     matches = re.findall(pattern, text)
     numbers = np.array([(float(m1), float(m2)) for m1, m2 in matches])
     return numbers
@@ -156,10 +161,16 @@ class EncoderModule(torch.nn.Module):
 
 
 parser = argparse.ArgumentParser(description="Train on specific dataset.")
-parser.add_argument('--n_samples', type=int, default=10000, help='Number of data points to generate.')
-parser.add_argument('--dataset', type=str, default='line',
-                    choices=['parabola', 'exponential', 'helix_slice', 'grid_sum', 'gauss_line'],
-                    help='Which dataset to use.')
+parser.add_argument(
+    "--n_samples", type=int, default=10000, help="Number of data points to generate."
+)
+parser.add_argument(
+    "--dataset",
+    type=str,
+    default="line",
+    choices=["parabola", "exponential", "helix_slice", "grid_sum", "gauss_line"],
+    help="Which dataset to use.",
+)
 args = parser.parse_args()
 
 
@@ -173,7 +184,7 @@ def make_linear_line(n=3_000, noise_std=0.1):
 
 def parabola(n=2000):
     t = np.random.uniform(-1, 1, n)[:, None]
-    return np.hstack([t, t ** 2])
+    return np.hstack([t, t**2])
 
 
 def exponential(n=2000):
@@ -194,20 +205,25 @@ def grid_sum(n_side=60, *args, **kwargs):
     return np.hstack((Z, U))
 
 
-GENS = dict(parabola=parabola, exponential=exponential, helix_slice=helix_slice, grid_sum=grid_sum,
-            gauss_line=make_linear_line)
+GENS = dict(
+    parabola=parabola,
+    exponential=exponential,
+    helix_slice=helix_slice,
+    grid_sum=grid_sum,
+    gauss_line=make_linear_line,
+)
 
 X_data = torch.tensor(GENS[args.dataset](n=args.n_samples), dtype=torch.float32)
 
-DATA_PRREFIX = f"../data/indep/{args.dataset}/"
-os.makedirs(DATA_PRREFIX, exist_ok=True)
+DATA_PREFIX = f"../data/indep/{args.dataset}/"
+os.makedirs(DATA_PREFIX, exist_ok=True)
 
 plt.scatter(X_data[:, 0], X_data[:, 1])
-plt.savefig(f"{DATA_PRREFIX}/data_{args.n_samples}_{SEED}.png");
-plt.show();
+plt.savefig(f"{DATA_PREFIX}/data_{args.n_samples}_{SEED}.png")
+plt.show()
 plt.close()
 
-torch.save(X_data, f"{DATA_PRREFIX}/data_{args.n_samples}_{SEED}.pt")
+torch.save(X_data, f"{DATA_PREFIX}/data_{args.n_samples}_{SEED}.pt")
 
 X_data_loader = loader.make_dataloader(X_data, device="cpu")
 
@@ -221,39 +237,60 @@ prefix = f"../res/indep/{args.dataset}/{k}k{num_layer}l{hidden_dim}h/"
 
 print(f"Model prefix: {prefix}", flush=True)
 
-dpaModel = DPA(beta=1., dist_enc="deterministic", dist_dec="stochastic", data_dim=n_feats, latent_dims=latent_dims,
-               num_layer=num_layer, hidden_dim=hidden_dim, noise_dim=hidden_dim, resblock=True, standardize=STANDARDIZE,
-               device=device, seed=SEED)
+dpaModel = DPA(
+    beta=1.0,
+    dist_enc="deterministic",
+    dist_dec="stochastic",
+    data_dim=n_feats,
+    latent_dims=latent_dims,
+    num_layer=num_layer,
+    hidden_dim=hidden_dim,
+    noise_dim=hidden_dim,
+    resblock=True,
+    standardize=STANDARDIZE,
+    device=device,
+    seed=SEED,
+)
 
 print("Training", flush=True)
 if STANDARDIZE:
-    dpaModel._standardize_data_and_record_stats(X_data.to(device));
+    dpaModel._standardize_data_and_record_stats(X_data.to(device))
 
-dpaModel.train(x=X_data_loader, num_epochs=2000,
-
-               batch_size=len(X_data),
-
-               lr=5e-4, save_model_every=100, print_every_nepoch=100, save_dir=prefix, save_loss=True, )
+dpaModel.train(
+    x=X_data_loader,
+    num_epochs=2000,
+    batch_size=len(X_data),
+    lr=5e-4,
+    save_model_every=100,
+    print_every_nepoch=100,
+    save_dir=prefix,
+    save_loss=True,
+)
 
 print("Plotting the results", flush=True)
 dpaModel.model = dpaModel.model.to(device)
-dpaModel.model.eval();
+dpaModel.model.eval()
 dpaeFunc = EncoderModule(dpaModel)
 
 a = extract_first_numbers_after_epoch(f"{prefix}/log.txt")
 plt.plot(a[1:, 0], a[1:, 1])
 argmin = np.argmin(a[1:, 1])
 plt.axvline(a[argmin + 1, 0], c="r")
-plt.axhline(0, c="k", ls="--");
-plt.savefig(f"{prefix}/loss.png");
-plt.show();
+plt.axhline(0, c="k", ls="--")
+plt.savefig(f"{prefix}/loss.png")
+plt.show()
 plt.close()
 
-dpaModel.plot_energy_loss(X_data.to(device), xscale='linear', save_dir=f"{prefix}/energy_loss.png")
+dpaModel.plot_energy_loss(
+    X_data.to(device), xscale="linear", save_dir=f"{prefix}/energy_loss.png"
+)
 
-dpaModel.plot_mse(X_data.to(device), xscale='linear', save_dir=f"{prefix}/mse.png")
+dpaModel.plot_mse(X_data.to(device), xscale="linear", save_dir=f"{prefix}/mse.png")
 
-limits = ((X_data[:, 0].min() * 1.5, X_data[:, 0].max() * 1.5), (X_data[:, 1].min() * 1.5, X_data[:, 1].max() * 1.5),)
+limits = (
+    (X_data[:, 0].min() * 1.5, X_data[:, 0].max() * 1.5),
+    (X_data[:, 1].min() * 1.5, X_data[:, 1].max() * 1.5),
+)
 n_components = X_data.shape[1]
 fig, axs = plt.subplots(1, n_components, figsize=(10 * n_components, 8))
 
@@ -262,10 +299,12 @@ if n_components == 1:
 for i in range(n_components):
     ax = axs[i]
     plot_isolines_2D(dpaeFunc, component=i, levels=25, ax=ax, limits=limits)
-    plot_isolines_2D(dpaeFunc, component=i, mode='contour', levels=25, ax=ax, limits=limits)
+    plot_isolines_2D(
+        dpaeFunc, component=i, mode="contour", levels=25, ax=ax, limits=limits
+    )
 
     ax.scatter(X_data[:, 0], X_data[:, 1], s=1, c="k", alpha=0.5)
 
-plt.savefig(f"{prefix}/level-sets.png");
-plt.show();
+plt.savefig(f"{prefix}/level-sets.png")
+plt.show()
 plt.close()

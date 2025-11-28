@@ -19,7 +19,7 @@ DATASETS=("parabola" "exponential" "helix_slice" "grid_sum")
 # Loop through the datasets and start training for each in the background
 for dataset in "${DATASETS[@]}"; do
     echo "Starting training for dataset: $dataset"
-    python -u train_simple.py --dataset "$dataset" &
+    python -u train_indep.py --dataset "$dataset" &
 done
 
 # Wait for all background jobs to finish

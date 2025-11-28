@@ -7,7 +7,7 @@ import re
 
 import warnings
 
-warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
 import sys
@@ -19,6 +19,7 @@ def slurm_cpus():
             return int(os.environ[var])
     try:
         import psutil
+
         return len(psutil.Process().cpu_affinity())
     except Exception:
         return None
@@ -40,7 +41,7 @@ import numpy as np
 import GPUtil
 
 if torch.cuda.is_available():
-    available_gpus = GPUtil.getAvailable(order='memory', limit=1)
+    available_gpus = GPUtil.getAvailable(order="memory", limit=1)
 
     if available_gpus:
         selected_gpu = available_gpus[0]
@@ -56,8 +57,12 @@ else:
 
 torch.manual_seed(SEED)
 
-sys.path += ["../src/DistributionalPrincipalAutoencoder", "../src/engression", "../src/mlcolvar",
-             "../src/PyTorch-VAE", ]
+sys.path += [
+    "../src/DistributionalPrincipalAutoencoder",
+    "../src/engression",
+    "../src/mlcolvar",
+    "../src/PyTorch-VAE",
+]
 
 from dpa.dpa_fit import DPA
 from engression.data import loader
@@ -69,41 +74,41 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-plt.style.use('default')
+plt.style.use("default")
 
-mpl.rcParams['figure.figsize'] = (10, 8)
-mpl.rcParams['figure.dpi'] = 200
-mpl.rcParams['savefig.dpi'] = 200
+mpl.rcParams["figure.figsize"] = (10, 8)
+mpl.rcParams["figure.dpi"] = 200
+mpl.rcParams["savefig.dpi"] = 200
 
-mpl.rcParams['font.size'] = 16
-mpl.rcParams['axes.titlesize'] = 20
-mpl.rcParams['axes.labelsize'] = 18
-mpl.rcParams['xtick.labelsize'] = 16
-mpl.rcParams['ytick.labelsize'] = 16
-mpl.rcParams['legend.fontsize'] = 16
+mpl.rcParams["font.size"] = 16
+mpl.rcParams["axes.titlesize"] = 20
+mpl.rcParams["axes.labelsize"] = 18
+mpl.rcParams["xtick.labelsize"] = 16
+mpl.rcParams["ytick.labelsize"] = 16
+mpl.rcParams["legend.fontsize"] = 16
 
-mpl.rcParams['lines.linewidth'] = 2.5
-mpl.rcParams['contour.linewidth'] = 1.5
-mpl.rcParams['lines.markersize'] = 10
-mpl.rcParams['axes.linewidth'] = 2
+mpl.rcParams["lines.linewidth"] = 2.5
+mpl.rcParams["contour.linewidth"] = 1.5
+mpl.rcParams["lines.markersize"] = 10
+mpl.rcParams["axes.linewidth"] = 2
 
-mpl.rcParams['axes.grid'] = False
-mpl.rcParams['grid.alpha'] = 0.3
-mpl.rcParams['grid.linewidth'] = 1
+mpl.rcParams["axes.grid"] = False
+mpl.rcParams["grid.alpha"] = 0.3
+mpl.rcParams["grid.linewidth"] = 1
 
-mpl.rcParams['legend.frameon'] = True
-mpl.rcParams['legend.framealpha'] = 1.0
-mpl.rcParams['legend.edgecolor'] = 'black'
+mpl.rcParams["legend.frameon"] = True
+mpl.rcParams["legend.framealpha"] = 1.0
+mpl.rcParams["legend.edgecolor"] = "black"
 
-mpl.rcParams['savefig.bbox'] = 'tight'
-mpl.rcParams['savefig.pad_inches'] = 0.1
+mpl.rcParams["savefig.bbox"] = "tight"
+mpl.rcParams["savefig.pad_inches"] = 0.1
 
 
 def extract_first_numbers_after_epoch(filename):
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         text = file.read()
 
-    pattern = r'\[Epoch (\d+)\]\s+([-*\d.]+)'
+    pattern = r"\[Epoch (\d+)\]\s+([-*\d.]+)"
     matches = re.findall(pattern, text)
     numbers = np.array([(float(m1), float(m2)) for m1, m2 in matches])
     return numbers
@@ -153,25 +158,44 @@ class EncoderModule(torch.nn.Module):
 
 def plot_3d(points, points_color=None, title=None, save_dir=None):
     x, y, z = points.T
-    fig, ax = plt.subplots(figsize=(5, 5), facecolor="white", tight_layout=True, subplot_kw={"projection": "3d"}, )
+    fig, ax = plt.subplots(
+        figsize=(5, 5),
+        facecolor="white",
+        tight_layout=True,
+        subplot_kw={"projection": "3d"},
+    )
     if title is not None:
         fig.suptitle(title, size=16)
     col = ax.scatter(x, y, z, c=points_color, s=50, alpha=0.8)
     ax.view_init(azim=-60, elev=9)
     if save_dir is not None:
-        plt.savefig(save_dir, bbox_inches='tight')
+        plt.savefig(save_dir, bbox_inches="tight")
     plt.show()
 
 
 parser = argparse.ArgumentParser(description="Train on specific dataset.")
-parser.add_argument('--n_samples', type=int, default=10000, help='Number of data points to generate.')
-parser.add_argument('--k', type=int, default=3, help='Number of latent dimensions.')
-parser.add_argument('--num_layer', type=int, default=4, help='Number of layers in the model.')
-parser.add_argument('--hidden_dim', type=int, default=100, help='Hidden dimension of the model.')
-parser.add_argument('--standardize', action='store_true', help='Whether to standardize the data.')
-parser.add_argument('--n_epochs', type=int, default=2000,
-                    help='Number of epochs to train the model. If None, defaults to 5000.')
-parser.add_argument('--lr', type=float, default=5e-4, help='Learning rate for the optimizer.')
+parser.add_argument(
+    "--n_samples", type=int, default=10000, help="Number of data points to generate."
+)
+parser.add_argument("--k", type=int, default=3, help="Number of latent dimensions.")
+parser.add_argument(
+    "--num_layer", type=int, default=4, help="Number of layers in the model."
+)
+parser.add_argument(
+    "--hidden_dim", type=int, default=100, help="Hidden dimension of the model."
+)
+parser.add_argument(
+    "--standardize", action="store_true", help="Whether to standardize the data."
+)
+parser.add_argument(
+    "--n_epochs",
+    type=int,
+    default=2000,
+    help="Number of epochs to train the model. If None, defaults to 5000.",
+)
+parser.add_argument(
+    "--lr", type=float, default=5e-4, help="Learning rate for the optimizer."
+)
 args = parser.parse_args()
 
 DATA_PRREFIX = f"../data/indep/scurve/"
@@ -197,33 +221,51 @@ prefix = f"../res/indep/scurve/beta{beta}_{k}k{num_layer}l{hidden_dim}h_{standar
 
 print(f"Model prefix: {prefix}", flush=True)
 
-dpaModel = DPA(beta=beta, dist_enc="deterministic", dist_dec="stochastic", data_dim=n_feats, latent_dims=latent_dims,
-               num_layer=num_layer, hidden_dim=hidden_dim, noise_dim=hidden_dim, resblock=True, standardize=standardize,
-               device=device, seed=SEED)
+dpaModel = DPA(
+    beta=beta,
+    dist_enc="deterministic",
+    dist_dec="stochastic",
+    data_dim=n_feats,
+    latent_dims=latent_dims,
+    num_layer=num_layer,
+    hidden_dim=hidden_dim,
+    noise_dim=hidden_dim,
+    resblock=True,
+    standardize=standardize,
+    device=device,
+    seed=SEED,
+)
 
 print("Training", flush=True)
 if standardize:
-    dpaModel._standardize_data_and_record_stats(X_data.to(device));
+    dpaModel._standardize_data_and_record_stats(X_data.to(device))
 
-dpaModel.train(x=X_data_loader, num_epochs=n_epochs,
-
-               batch_size=len(X_data),
-
-               lr=lr, save_model_every=100, print_every_nepoch=100, save_dir=prefix, save_loss=True, )
+dpaModel.train(
+    x=X_data_loader,
+    num_epochs=n_epochs,
+    batch_size=len(X_data),
+    lr=lr,
+    save_model_every=100,
+    print_every_nepoch=100,
+    save_dir=prefix,
+    save_loss=True,
+)
 
 print("Plotting the results", flush=True)
 dpaModel.model = dpaModel.model.to(device)
-dpaModel.model.eval();
+dpaModel.model.eval()
 
 a = extract_first_numbers_after_epoch(f"{prefix}/log.txt")
 plt.plot(a[1:, 0], a[1:, 1])
 argmin = np.argmin(a[1:, 1])
 plt.axvline(a[argmin + 1, 0], c="r")
-plt.axhline(0, c="k", ls="--");
-plt.savefig(f"{prefix}/loss.png");
-plt.show();
+plt.axhline(0, c="k", ls="--")
+plt.savefig(f"{prefix}/loss.png")
+plt.show()
 plt.close()
 
-dpaModel.plot_energy_loss(X_data.to(device), xscale='linear', save_dir=f"{prefix}/energy_loss.png")
+dpaModel.plot_energy_loss(
+    X_data.to(device), xscale="linear", save_dir=f"{prefix}/energy_loss.png"
+)
 
-dpaModel.plot_mse(X_data.to(device), xscale='linear', save_dir=f"{prefix}/mse.png")
+dpaModel.plot_mse(X_data.to(device), xscale="linear", save_dir=f"{prefix}/mse.png")

@@ -6,15 +6,12 @@ B_BOOTSTRAP = 400
 
 ################################################################################
 
-import copy
 import os
 import re
 
-import gc
-
 import warnings
 
-warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
 import sys
@@ -26,6 +23,7 @@ def slurm_cpus():
             return int(os.environ[var])
     try:
         import psutil
+
         return len(psutil.Process().cpu_affinity())
     except Exception:
         return None
@@ -39,16 +37,15 @@ os.environ["MKL_NUM_THREADS"] = f"{n_threads}"
 os.environ["OPENBLAS_NUM_THREADS"] = f"{n_threads}"
 
 import torch
+
 torch.set_num_threads(n_threads)
 
 import numpy as np
-import scipy
-from scipy import stats
 
 import GPUtil
 
 if torch.cuda.is_available():
-    available_gpus = GPUtil.getAvailable(order='memory', limit=1)
+    available_gpus = GPUtil.getAvailable(order="memory", limit=1)
 
     if available_gpus:
         selected_gpu = available_gpus[0]
@@ -65,13 +62,7 @@ else:
 torch.manual_seed(SEED)
 
 import joblib
-import pandas as pd
-import seaborn as sns
-from scipy.stats import multivariate_normal
-import math
-import time
 
-from causallearn.utils.cit import CIT
 from scipy.stats import kstest
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
@@ -94,41 +85,41 @@ import matplotlib as mpl
 # ────────────────────────────────────────────────────────────────────────────
 #  Matplotlib defaults  (unchanged, but condensed)
 # ────────────────────────────────────────────────────────────────────────────
-plt.style.use('default')
+plt.style.use("default")
 
-mpl.rcParams['figure.figsize'] = (10, 8)
-mpl.rcParams['figure.dpi'] = 200
-mpl.rcParams['savefig.dpi'] = 200
+mpl.rcParams["figure.figsize"] = (10, 8)
+mpl.rcParams["figure.dpi"] = 200
+mpl.rcParams["savefig.dpi"] = 200
 
-mpl.rcParams['font.size'] = 16
-mpl.rcParams['axes.titlesize'] = 20
-mpl.rcParams['axes.labelsize'] = 18
-mpl.rcParams['xtick.labelsize'] = 16
-mpl.rcParams['ytick.labelsize'] = 16
-mpl.rcParams['legend.fontsize'] = 16
+mpl.rcParams["font.size"] = 16
+mpl.rcParams["axes.titlesize"] = 20
+mpl.rcParams["axes.labelsize"] = 18
+mpl.rcParams["xtick.labelsize"] = 16
+mpl.rcParams["ytick.labelsize"] = 16
+mpl.rcParams["legend.fontsize"] = 16
 
-mpl.rcParams['lines.linewidth'] = 2.5
-mpl.rcParams['contour.linewidth'] = 1.5
-mpl.rcParams['lines.markersize'] = 10
-mpl.rcParams['axes.linewidth'] = 2
+mpl.rcParams["lines.linewidth"] = 2.5
+mpl.rcParams["contour.linewidth"] = 1.5
+mpl.rcParams["lines.markersize"] = 10
+mpl.rcParams["axes.linewidth"] = 2
 
-mpl.rcParams['axes.grid'] = False
-mpl.rcParams['grid.alpha'] = 0.3
-mpl.rcParams['grid.linewidth'] = 1
+mpl.rcParams["axes.grid"] = False
+mpl.rcParams["grid.alpha"] = 0.3
+mpl.rcParams["grid.linewidth"] = 1
 
-mpl.rcParams['legend.frameon'] = True
-mpl.rcParams['legend.framealpha'] = 1.0
-mpl.rcParams['legend.edgecolor'] = 'black'
+mpl.rcParams["legend.frameon"] = True
+mpl.rcParams["legend.framealpha"] = 1.0
+mpl.rcParams["legend.edgecolor"] = "black"
 
-mpl.rcParams['savefig.bbox'] = 'tight'
-mpl.rcParams['savefig.pad_inches'] = 0.1
+mpl.rcParams["savefig.bbox"] = "tight"
+mpl.rcParams["savefig.pad_inches"] = 0.1
 
 
 def extract_first_numbers_after_epoch(filename):
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         text = file.read()
 
-    pattern = r'\[Epoch (\d+)\]\s+([-*\d.]+)'
+    pattern = r"\[Epoch (\d+)\]\s+([-*\d.]+)"
     matches = re.findall(pattern, text)
     numbers = np.array([(float(m1), float(m2)) for m1, m2 in matches])
     return numbers
@@ -198,15 +189,16 @@ def _hsic_stat(u: np.ndarray, x: np.ndarray) -> float:
 
 
 def double_crt(
-        u: np.ndarray,
-        x: np.ndarray,
-        z: np.ndarray,
-        model,
-        latent_dim: int,
-        B: int = 500,
-        device: str = "cpu",
-        rng: np.random.Generator | None = None,
-        verbose: bool = False):
+    u: np.ndarray,
+    x: np.ndarray,
+    z: np.ndarray,
+    model,
+    latent_dim: int,
+    B: int = 500,
+    device: str = "cpu",
+    rng: np.random.Generator | None = None,
+    verbose: bool = False,
+):
     """
     Return (p_value, observed_statistic, bootstrap_stats[B]).
     """
@@ -231,11 +223,7 @@ def double_crt(
         u_b = u_b.reshape(-1, 1).astype(np.float32)
 
         with torch.no_grad():
-            x_b = model.decode(
-                z_full,
-                mean=False,
-                gen_sample_size=1
-            ).cpu().numpy()
+            x_b = model.decode(z_full, mean=False, gen_sample_size=1).cpu().numpy()
 
         if len(x_b.shape) > 2:
             x_b = x_b.squeeze()
@@ -306,26 +294,29 @@ prefix = f"../res/indep/gauss_line/{k}k{num_layer}l{hidden_dim}h/"
 
 print(f"Model prefix: {prefix}", flush=True)
 
-dpaModel_line = DPA(beta=1.,
-                    dist_enc="deterministic",
-                    dist_dec="stochastic",
-                    data_dim=n_feats,
-                    latent_dims=latent_dims,
-                    num_layer=num_layer,
-                    hidden_dim=hidden_dim,
-                    noise_dim=100,
-                    resblock=True,
-                    standardize=False,
-                    device=device,
-                    seed=SEED
-                    )
+dpaModel_line = DPA(
+    beta=1.0,
+    dist_enc="deterministic",
+    dist_dec="stochastic",
+    data_dim=n_feats,
+    latent_dims=latent_dims,
+    num_layer=num_layer,
+    hidden_dim=hidden_dim,
+    noise_dim=100,
+    resblock=True,
+    standardize=False,
+    device=device,
+    seed=SEED,
+)
 
-dpaModel_line.model.load_state_dict(torch.load(f"{prefix}/model_{4000}.pt",
-                                               ),
-                                    )
+dpaModel_line.model.load_state_dict(
+    torch.load(
+        f"{prefix}/model_{4000}.pt",
+    ),
+)
 
 dpaModel_line.model = dpaModel_line.model.to(device)
-dpaModel_line.model.eval();
+dpaModel_line.model.eval()
 dpaeFunc_line = EncoderModule(dpaModel_line)
 
 model = dpaModel_line
@@ -350,11 +341,12 @@ for iter in range(N_REPS):
     print(f"Iteration {iter + 1}/{N_REPS} ...", flush=True)
 
     with torch.no_grad():
-        X_obs = model.decode(
-            z_lat.to(device),
-            mean=False,
-            gen_sample_size=1
-        ).squeeze().cpu().numpy()
+        X_obs = (
+            model.decode(z_lat.to(device), mean=False, gen_sample_size=1)
+            .squeeze()
+            .cpu()
+            .numpy()
+        )
 
     p_val, t_obs, t_null = double_crt(
         u=U2,
@@ -365,7 +357,7 @@ for iter in range(N_REPS):
         B=B_BOOTSTRAP,
         device=device,
         rng=rng,
-        verbose=True
+        verbose=True,
     )
 
     pvals.append(p_val)
@@ -382,18 +374,18 @@ if not os.path.exists(RES_PREFIX):
 results = {
     "pvals": np.array(pvals),
     "t_obss": np.array(t_obss),
-    "t_nulls": np.array(t_nulls)
+    "t_nulls": np.array(t_nulls),
 }
 
 joblib.dump(results, f"{RES_PREFIX}/results_{N_REPS}reps_{B_BOOTSTRAP}boot.pkl")
 
-plt.scatter(np.linspace(0, 1, len(pvals), endpoint=False), np.sort(pvals), s=12);
-plt.plot([0, 1], [0, 1], lw=1);
-plt.xlabel("Uniform(0,1) quantile");
-plt.ylabel("Observed p‑value");
-plt.savefig(f"{RES_PREFIX}/pvals_{N_REPS}reps_{B_BOOTSTRAP}boot.png");
-plt.show();
-plt.close();
+plt.scatter(np.linspace(0, 1, len(pvals), endpoint=False), np.sort(pvals), s=12)
+plt.plot([0, 1], [0, 1], lw=1)
+plt.xlabel("Uniform(0,1) quantile")
+plt.ylabel("Observed p‑value")
+plt.savefig(f"{RES_PREFIX}/pvals_{N_REPS}reps_{B_BOOTSTRAP}boot.png")
+plt.show()
+plt.close()
 
 pvals = np.array(pvals)
 D_KS, p_KS = kstest(pvals, "uniform")

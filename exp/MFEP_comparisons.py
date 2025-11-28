@@ -27,52 +27,62 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-sys.path += ["../", "../src/DistributionalPrincipalAutoencoder", "../src/engression", "../src/mlcolvar",
-    "../src/PyTorch-VAE", ]
+import lightning
+from lightning.pytorch import Trainer
+
+sys.path += [
+    "../",
+    "../src/DistributionalPrincipalAutoencoder",
+    "../src/engression",
+    "../src/mlcolvar",
+    "../src/PyTorch-VAE",
+]
 from engression.data import loader
 from mlcolvar.utils.io import create_dataset_from_files
 from mlcolvar.data import DictModule
-from mlcolvar.cvs import VariationalAutoEncoderCV
+from mlcolvar.cvs import AutoEncoderCV, VariationalAutoEncoderCV
 from utils import mfep_utils
+from dpa.dpa_fit import DPA
 from models.beta_vae import BetaVAE
 from models.betatc_vae import BetaTCVAE
 
 # ────────────────────────────────────────────────────────────────────────────
 #  Matplotlib defaults
 # ────────────────────────────────────────────────────────────────────────────
-plt.style.use('default')
+plt.style.use("default")
 
-mpl.rcParams['figure.figsize'] = (10, 8)
-mpl.rcParams['figure.dpi'] = 200
-mpl.rcParams['savefig.dpi'] = 200
+mpl.rcParams["figure.figsize"] = (10, 8)
+mpl.rcParams["figure.dpi"] = 200
+mpl.rcParams["savefig.dpi"] = 200
 
-mpl.rcParams['font.size'] = 16
-mpl.rcParams['axes.titlesize'] = 20
-mpl.rcParams['axes.labelsize'] = 18
-mpl.rcParams['xtick.labelsize'] = 16
-mpl.rcParams['ytick.labelsize'] = 16
-mpl.rcParams['legend.fontsize'] = 16
+mpl.rcParams["font.size"] = 16
+mpl.rcParams["axes.titlesize"] = 20
+mpl.rcParams["axes.labelsize"] = 18
+mpl.rcParams["xtick.labelsize"] = 16
+mpl.rcParams["ytick.labelsize"] = 16
+mpl.rcParams["legend.fontsize"] = 16
 
-mpl.rcParams['lines.linewidth'] = 2.5
-mpl.rcParams['contour.linewidth'] = 1.5
-mpl.rcParams['lines.markersize'] = 10
-mpl.rcParams['axes.linewidth'] = 2
+mpl.rcParams["lines.linewidth"] = 2.5
+mpl.rcParams["contour.linewidth"] = 1.5
+mpl.rcParams["lines.markersize"] = 10
+mpl.rcParams["axes.linewidth"] = 2
 
-mpl.rcParams['axes.grid'] = False
-mpl.rcParams['grid.alpha'] = 0.3
-mpl.rcParams['grid.linewidth'] = 1
+mpl.rcParams["axes.grid"] = False
+mpl.rcParams["grid.alpha"] = 0.3
+mpl.rcParams["grid.linewidth"] = 1
 
-mpl.rcParams['legend.frameon'] = True
-mpl.rcParams['legend.framealpha'] = 1.0
-mpl.rcParams['legend.edgecolor'] = 'black'
+mpl.rcParams["legend.frameon"] = True
+mpl.rcParams["legend.framealpha"] = 1.0
+mpl.rcParams["legend.edgecolor"] = "black"
 
-mpl.rcParams['savefig.bbox'] = 'tight'
-mpl.rcParams['savefig.pad_inches'] = 0.1
+mpl.rcParams["savefig.bbox"] = "tight"
+mpl.rcParams["savefig.pad_inches"] = 0.1
 
 
 # ────────────────────────────────────────────────────────────────────────────
 #  Helpers
 # ────────────────────────────────────────────────────────────────────────────
+
 
 class BetaVAE_FC(BetaVAE):
     """
@@ -81,8 +91,20 @@ class BetaVAE_FC(BetaVAE):
     used by AE/VAE in this script.
     """
 
-    def __init__(self, in_dim: int, latent_dim: int = 2, hidden_dims: list[int] = (100, 100), beta: int = 4):
-        super().__init__(in_channels=1, latent_dim=latent_dim, hidden_dims=[1], beta=beta, loss_type='H')
+    def __init__(
+        self,
+        in_dim: int,
+        latent_dim: int = 2,
+        hidden_dims: list[int] = (100, 100),
+        beta: int = 4,
+    ):
+        super().__init__(
+            in_channels=1,
+            latent_dim=latent_dim,
+            hidden_dims=[1],
+            beta=beta,
+            loss_type="H",
+        )
 
         # ── replace Conv encoder/decoder with MLPs ──────────────────
         enc = []
@@ -124,10 +146,25 @@ class BetaTCVAE_FC(BetaTCVAE):
     other (vector) benchmarks.
     """
 
-    def __init__(self, in_dim: int, latent_dim: int = 2, hidden_dims: list[int] = (100, 100), anneal_steps: int = 200,
-                 alpha: float = 1., beta: float = 6., gamma: float = 1.):
-        super().__init__(in_channels=1, latent_dim=latent_dim, hidden_dims=[1], anneal_steps=anneal_steps, alpha=alpha,
-                         beta=beta, gamma=gamma)
+    def __init__(
+        self,
+        in_dim: int,
+        latent_dim: int = 2,
+        hidden_dims: list[int] = (100, 100),
+        anneal_steps: int = 200,
+        alpha: float = 1.0,
+        beta: float = 6.0,
+        gamma: float = 1.0,
+    ):
+        super().__init__(
+            in_channels=1,
+            latent_dim=latent_dim,
+            hidden_dims=[1],
+            anneal_steps=anneal_steps,
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+        )
 
         # ── fully‑connected encoder ──────────────────────────────────
         enc = []
@@ -249,12 +286,18 @@ RAW_JSON = SAVE_DIR / "all_runs.json"
 mfep_xy = np.load("../res/aux/MB/mfep_xy.npy")
 start_xy = mfep_xy[0]
 
-filenames = ["../src/mlcolvar/docs/notebooks/tutorials/data/muller-brown/unbiased/high-temp/COLVAR"]
-dataset, df = create_dataset_from_files(filenames, filter_args={"regex": "p.x|p.y"}, return_dataframe=True)
+filenames = [
+    "../src/mlcolvar/docs/notebooks/tutorials/data/muller-brown/unbiased/high-temp/COLVAR"
+]
+dataset, df = create_dataset_from_files(
+    filenames, filter_args={"regex": "p.x|p.y"}, return_dataframe=True
+)
 n_input = dataset[:]["data"].shape[1]
 
 datamodule = DictModule(dataset, lengths=[0.8, 0.2], random_split=True)
-X_loader = loader.make_dataloader(dataset[:]["data"].to(DEVICE), batch_size=5000, shuffle=True, device="cpu")
+X_loader = loader.make_dataloader(
+    dataset[:]["data"].to(DEVICE), batch_size=5000, shuffle=True, device="cpu"
+)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -278,7 +321,14 @@ def safe_savefig(fig, path):
 
 
 def add_failure(all_runs, model, seed, exc):
-    all_runs.append({"model": model, "seed": seed, "status": "failed", "error": str(exc).replace("\n", " "), })
+    all_runs.append(
+        {
+            "model": model,
+            "seed": seed,
+            "status": "failed",
+            "error": str(exc).replace("\n", " "),
+        }
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -290,21 +340,52 @@ for seed in SEED_LIST:
     print(f"\n=== Seed {seed} ===", flush=True)
     try:
         set_all_seeds(seed)
-        dpa = DPA(beta=2, dist_enc="deterministic", dist_dec="stochastic", data_dim=n_input, latent_dims=[2, 1, 0],
-            num_layer=4, hidden_dim=100, noise_dim=100, resblock=True, standardize=False, device=DEVICE, seed=seed, )
-        dpa.train(X_loader, batch_size=len(dataset) // 2, num_epochs=N_EPOCHS_DPA, lr=5e-4, save_model_every=999999,
-            save_dir=SAVE_DIR / "tmp", save_loss=False, )
+        dpa = DPA(
+            beta=2,
+            dist_enc="deterministic",
+            dist_dec="stochastic",
+            data_dim=n_input,
+            latent_dims=[2, 1, 0],
+            num_layer=4,
+            hidden_dim=100,
+            noise_dim=100,
+            resblock=True,
+            standardize=False,
+            device=DEVICE,
+            seed=seed,
+        )
+        dpa.train(
+            X_loader,
+            batch_size=len(dataset) // 2,
+            num_epochs=N_EPOCHS_DPA,
+            lr=5e-4,
+            save_model_every=999999,
+            save_dir=SAVE_DIR / "tmp",
+            save_loss=False,
+        )
         enc_dpa = EncoderModule(dpa).to(DEVICE)
 
-        scores = mfep_utils.parametrisation_test(encoder=enc_dpa.to(DEVICE), mfep_xy=mfep_xy, start_minimum_xy=start_xy,
-            device=DEVICE, **PARAM_TEST_KW, grad=True, )
+        scores = mfep_utils.parametrisation_test(
+            encoder=enc_dpa.to(DEVICE),
+            mfep_xy=mfep_xy,
+            start_minimum_xy=start_xy,
+            device=DEVICE,
+            **PARAM_TEST_KW,
+            grad=True,
+        )
 
         all_runs.append({"model": "DPA", "seed": seed, "status": "ok", **scores})
 
         fig, ax = plt.subplots()
         ax.scatter(*mfep_xy.T, s=1, c="purple", label="MFEP")
         ax.scatter(*scores["reconstructed_path"].T, s=10, c="red", label="DPA")
-        ax.scatter(*scores["reconstructed_path_grad"].T, s=10, c="orange", alpha=0.75, label="DPA-grad")
+        ax.scatter(
+            *scores["reconstructed_path_grad"].T,
+            s=10,
+            c="orange",
+            alpha=0.75,
+            label="DPA-grad",
+        )
         ax.legend()
         safe_savefig(fig, FIG_DIR / f"dpa_seed_{seed}.png")
 
@@ -329,8 +410,14 @@ for seed in SEED_LIST:
                 opt.step()
 
         enc_beta = lambda x: modelBETA.encode(x)[0]
-        scores = mfep_utils.parametrisation_test(encoder=enc_beta, mfep_xy=mfep_xy, start_minimum_xy=start_xy,
-            device=DEVICE, **PARAM_TEST_KW, grad=False)
+        scores = mfep_utils.parametrisation_test(
+            encoder=enc_beta,
+            mfep_xy=mfep_xy,
+            start_minimum_xy=start_xy,
+            device=DEVICE,
+            **PARAM_TEST_KW,
+            grad=False,
+        )
 
         all_runs.append({"model": "β‑VAE", "seed": seed, "status": "ok", **scores})
 
@@ -348,8 +435,13 @@ for seed in SEED_LIST:
         set_all_seeds(seed)
         modelTC = BetaTCVAE_FC(in_dim=n_input, latent_dim=2).to(DEVICE)
 
-        X_loader_tc = torch.utils.data.DataLoader(X_loader.dataset, batch_size=256, shuffle=True, drop_last=True,
-            num_workers=0)
+        X_loader_tc = torch.utils.data.DataLoader(
+            X_loader.dataset,
+            batch_size=256,
+            shuffle=True,
+            drop_last=True,
+            num_workers=0,
+        )
         dataset_size = len(X_loader_tc.dataset)
         opt = torch.optim.Adam(modelTC.parameters(), lr=1e-3)
 
@@ -365,8 +457,14 @@ for seed in SEED_LIST:
                 opt.step()
 
         enc_tc = lambda x: modelTC.encode(x)[0]
-        scores = mfep_utils.parametrisation_test(encoder=enc_tc, mfep_xy=mfep_xy, start_minimum_xy=start_xy,
-            device=DEVICE, **PARAM_TEST_KW, grad=False)
+        scores = mfep_utils.parametrisation_test(
+            encoder=enc_tc,
+            mfep_xy=mfep_xy,
+            start_minimum_xy=start_xy,
+            device=DEVICE,
+            **PARAM_TEST_KW,
+            grad=False,
+        )
 
         all_runs.append({"model": "β‑TC‑VAE", "seed": seed, "status": "ok", **scores})
 
@@ -382,15 +480,30 @@ for seed in SEED_LIST:
 
     try:
         set_all_seeds(seed)
-        modelAE = AutoEncoderCV([n_input, 100, 100, 2], options={"encoder": {"activation": "shifted_softplus"},
-                                                                 "decoder": {"activation": "shifted_softplus"}}, ).to(
-            DEVICE)
-        trainerAE = lightning.Trainer(max_epochs=N_EPOCHS_AE, logger=None, enable_checkpointing=False,
-            enable_progress_bar=False, enable_model_summary=False, )
+        modelAE = AutoEncoderCV(
+            [n_input, 100, 100, 2],
+            options={
+                "encoder": {"activation": "shifted_softplus"},
+                "decoder": {"activation": "shifted_softplus"},
+            },
+        ).to(DEVICE)
+        trainerAE = lightning.Trainer(
+            max_epochs=N_EPOCHS_AE,
+            logger=None,
+            enable_checkpointing=False,
+            enable_progress_bar=False,
+            enable_model_summary=False,
+        )
         trainerAE.fit(modelAE, datamodule)
 
-        scores = mfep_utils.parametrisation_test(encoder=modelAE.to(DEVICE), mfep_xy=mfep_xy, start_minimum_xy=start_xy,
-            device=DEVICE, **PARAM_TEST_KW, grad=False, )
+        scores = mfep_utils.parametrisation_test(
+            encoder=modelAE.to(DEVICE),
+            mfep_xy=mfep_xy,
+            start_minimum_xy=start_xy,
+            device=DEVICE,
+            **PARAM_TEST_KW,
+            grad=False,
+        )
         all_runs.append({"model": "AE", "seed": seed, "status": "ok", **scores})
 
         fig, ax = plt.subplots()
@@ -405,15 +518,32 @@ for seed in SEED_LIST:
 
     try:
         set_all_seeds(seed)
-        modelVAE = VariationalAutoEncoderCV(n_cvs=2, encoder_layers=[n_input, 100, 100],
-            options={"encoder": {"activation": "elu"}, "decoder": {"activation": "elu"}}, ).to(DEVICE)
-        trainerVAE = lightning.Trainer(max_epochs=N_EPOCHS_VAE, logger=None, enable_checkpointing=False,
-            enable_progress_bar=False, enable_model_summary=False, )
+        modelVAE = VariationalAutoEncoderCV(
+            n_cvs=2,
+            encoder_layers=[n_input, 100, 100],
+            options={
+                "encoder": {"activation": "elu"},
+                "decoder": {"activation": "elu"},
+            },
+        ).to(DEVICE)
+        trainerVAE = lightning.Trainer(
+            max_epochs=N_EPOCHS_VAE,
+            logger=None,
+            enable_checkpointing=False,
+            enable_progress_bar=False,
+            enable_model_summary=False,
+        )
         trainerVAE.fit(modelVAE, datamodule)
 
         enc_vae = ForwardCVModule(modelVAE).to(DEVICE)
-        scores = mfep_utils.parametrisation_test(encoder=enc_vae.to(DEVICE), mfep_xy=mfep_xy, start_minimum_xy=start_xy,
-            device=DEVICE, **PARAM_TEST_KW, grad=False, )
+        scores = mfep_utils.parametrisation_test(
+            encoder=enc_vae.to(DEVICE),
+            mfep_xy=mfep_xy,
+            start_minimum_xy=start_xy,
+            device=DEVICE,
+            **PARAM_TEST_KW,
+            grad=False,
+        )
         all_runs.append({"model": "VAE", "seed": seed, "status": "ok", **scores})
 
         fig, ax = plt.subplots()
