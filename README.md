@@ -93,6 +93,10 @@ The structure of the repository is as follows:
     * `plot_utils.py` - plotting utilities (some adapted from `mlcolvar`)
 
 
+## Citation
+
+If you find this work useful in your research, please consider citing the paper:
+
 ```bibtex
 @inproceedings{
   leban2025distributionalautoencodersknowscore,
