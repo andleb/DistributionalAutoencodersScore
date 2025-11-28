@@ -72,8 +72,6 @@ For a quickstart, the `exp/Gaussian_score.ipynb` notebook is probably the best s
 
 The structure of the repository is as follows:
 
-- `data/` - datasets used in the experiments
-- `exp/` - the experiment scripts and notebooks
 - `data` - datasets used in the experiments
 - `exp` - the experiments scripts and notebooks
     * `MB.ipynb` - reproduces Figure 2
