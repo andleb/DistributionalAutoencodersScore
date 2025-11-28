@@ -8,7 +8,11 @@ Department of Statistics, University of Michigan.
 <div align='center'>
     <a href='https://openreview.net/pdf?id=5RIop1E1ga'><img src='https://img.shields.io/badge/Paper-NeurIPS2025-red'></a>
     <a href='https://arxiv.org/abs/2502.11583'><img src='https://img.shields.io/badge/Paper-ArXiv-Green'></a>
-</div>
+</div>  
+
+
+
+
 
 Official code repository for [Distributional Autoencoders Know the Score](https://neurips.cc/virtual/2025/poster/119870), NeurIPS 2025.  
 
