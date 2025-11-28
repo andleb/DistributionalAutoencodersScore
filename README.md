@@ -67,8 +67,10 @@ For code that was modified, the respective licenses are reproduced in the `third
 
 ## Structure and results
 
-All paths below are relative to the repository root. Unless otherwise noted, we assume the repository root is on your `PYTHONPATH`. The results can be reproduced by running the files in the `exp/` folder.
+All paths below are relative to the repository root. Unless otherwise noted, we assume the repository root is on your `PYTHONPATH`.
+The contents assume *Option B* from the installation instructions above was used and append the `src/` folder to the `PYTHONPATH`.
 
+The results can be reproduced by running the files in the `exp/` folder - see the structure listing below for particular result.
 For a quickstart, the `exp/Gaussian_score.ipynb` notebook is probably the best self-contained example to start with.
 
 The structure of the repository is as follows:
