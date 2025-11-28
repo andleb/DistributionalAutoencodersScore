@@ -1,13 +1,59 @@
-# DistributionalAutoencodersScore
-Official code repository for [Distributional Autoencoders Know the Score](https://arxiv.org/abs/2502.11583), NeurIPS 2025.  
+<h1 align='center'>Distributional Autoencoders Know the Score</h1>
+<div align='center'>
+    <a href='https://andleb.netlify.app/' target='_blank'>Andrej Leban</a>
+</div>
+<div align='center'>
+Department of Statistics, University of Michigan.
+</div>
+<div align='center'>
+    <a href='https://openreview.net/pdf?id=5RIop1E1ga'><img src='https://img.shields.io/badge/Paper-NeurIPS2025-red'></a>
+</div>
+
+Official code repository for [Distributional Autoencoders Know the Score](https://neurips.cc/virtual/2025/loc/san-diego/poster/119870), NeurIPS 2025.  
 
 Besides software from `pypi` installed via  `requirement.txt`, this repository depends on the following packages, which can be installed from their respective GitHub repositories:
 - [Distributional Principal Autoencoder](https://github.com/xwshen51/DistributionalPrincipalAutoencoder)
+
 - [mlcolvar](https://github.com/luigibonati/mlcolvar)
 
 Their respective licenses are reproduced in the `third_party_licenses` folder.
 
-# Structure
+
+## Installation
+
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/andleb/DistributionalAutoencodersScore
+   cd DistributionalAutoencodersScore
+   ```
+   
+2. Install general dependencies:  
+  ```bash
+   pip install -r requirements.txt
+    
+   ```
+
+3. Install the Distributional Principal Autoencoder (with `engression` as its dependency) and mlcolvar dependencies:  
+  ```bash
+  pip install engression
+  pip install DistributionalPrincipalAutoencoder
+  pip install mlcolvar
+  
+  ```
+
+OR clone them locally as submodules (in `src` folder):
+```bash
+  mkdir src
+  cd src
+  git submodule add git@github.com:xwshen51/engression.git
+  git submodule add git@github.com:xwshen51/DistributionalPrincipalAutoencoder.git
+  git submodule add git@github.com:luigibonati/mlcolvar.git
+```
+
+
+
+
+## Structure
 - `data` - datasets used in the experiments
 - `exp` - the experiments scripts and notebooks
     * `Gaussian_score.ipynb` - reproduces Figure 1
