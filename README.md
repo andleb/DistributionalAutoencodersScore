@@ -105,6 +105,7 @@ If you find this work useful in your research, please consider citing the paper:
   author={Andrej Leban},
   booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
   year={2025},
-  url={https://neurips.cc/virtual/2025/poster/119870}
+  url={https://papers.nips.cc/paper_files/paper/2025/hash/a3edf86cbae26915b35ab24c253dfb96-Abstract-Conference.html},
+  doi = {10.52202/085713-3770}
 }
 ```
